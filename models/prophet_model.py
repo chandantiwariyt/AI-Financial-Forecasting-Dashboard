@@ -1,7 +1,7 @@
 from prophet import Prophet
 import pandas as pd
 
-def prophet_forecast(df, forecast_days=90):
+def run_prophet_forecast(df, forecast_days=90):
     model = Prophet(
         changepoint_prior_scale=0.05,
         seasonality_prior_scale=10,
