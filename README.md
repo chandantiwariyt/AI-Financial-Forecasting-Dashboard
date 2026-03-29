@@ -18,6 +18,7 @@ An institutional-grade financial forecasting dashboard built with Python and Str
 ## 🚀 How to Run
 pip install -r requirements.txt
 streamlit run app.py
+Live App https://ai-financial-forecasting-dashboard.onrender.com/
 
 ## 📊 Sample Tickers
 - Indian Stocks: RELIANCE.NS, TCS.NS, HDFCBANK.NS
