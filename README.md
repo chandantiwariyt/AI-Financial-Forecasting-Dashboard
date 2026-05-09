@@ -2,6 +2,19 @@
 
 NiveshX is an AI-powered financial forecasting dashboard for Indian and global market symbols. It combines live market data, Prophet forecasting, stock comparison, simple AI-style insights, and PDF report export in a cleaner investor-facing Streamlit interface.
 
+## 🛠 Tech Stack
+- Python, Streamlit, Prophet, TensorFlow
+- yFinance, FRED API, Plotly, Pandas, Scikit-learn
+
+## 🚀 How to Run
+pip install -r requirements.txt
+streamlit run app.py
+Live App [Click here](https://ai-financial-forecasting-dashboard.onrender.com/)
+
+## 📊 Sample Tickers
+- Indian Stocks: RELIANCE.NS, TCS.NS, HDFCBANK.NS
+- US Stocks: AAPL, MSFT, GOOGL
+
 ## Current Version
 
 Suggested release version: `v1.1.0`
@@ -69,79 +82,40 @@ This version fixes stock pricing for Indian-listed tickers (.NS/.BO) which were 
 | Data handling | Pandas, NumPy |
 | Reports | Local PDF utility |
 
-## Run Locally
+## 🚀 Getting Started
 
-From VS Code or PowerShell:
+### Prerequisites
+- Python 3.8+
+- pip or virtual environment
 
-```powershell
-cd "C:\Users\kunal\OneDrive\Financial ProJects\AI financial Forcasting Dashboards"
-.\venv\Scripts\activate
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/chandantiwariyt/AI-Financial-Forecasting-Dashboard.git
+cd personal-finance-tracker
+
+# Create and activate virtual environment
+python -m venv .venv
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate     # Mac/Linux
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the app
 streamlit run app.py
 ```
 
-Live App: [Click here](https://ai-financial-forecasting-dashboard.onrender.com/)
+## 🔮 Future Improvements
+- [ ] Adding Mutual Funds
+- [ ] Nifty 50
 
-## 📊 Sample Tickers
-- Indian Stocks: RELIANCE.NS, TCS.NS, HDFCBANK.NS
-- US Stocks: AAPL, MSFT, GOOGL
+---
 
+## 👤 Author
+Built by **Chandan Tiwari** — [LinkedIn](https://www.linkedin.com/in/chandantiwari4/) · [GitHub](https://github.com/chandantiwariyt)
+---
 
-If `streamlit` is not recognized:
-
-```powershell
-.\venv\Scripts\python.exe -m streamlit run app.py
-```
-
-Then open the local URL printed by Streamlit, usually:
-
-```text
-http://localhost:8501
-```
-
-## Release This As A New Version
-
-Use this checklist after testing locally:
-
-1. Review changed files:
-
-```powershell
-git status
-git diff
-```
-
-2. Stage only the files for this release:
-
-```powershell
-git add app.py dashboard.py forecast.py compare.py insights.py data/preprocessor.py README.md assets/niveshx-logo.png assets/niveshx-logo-cropped.png
-```
-
-3. Commit the update:
-
-```powershell
-git commit -m "Release NiveshX UI refresh"
-```
-
-4. Create a version tag:
-
-```powershell
-git tag v1.2.1
-```
-
-5. Push the code and tag:
-
-```powershell
-git push origin main
-git push origin v1.2.1
-```
-
-6. Redeploy:
-
-- If Render is connected to GitHub, pushing to `main` should trigger a deploy automatically.
-- If auto-deploy is disabled, open the Render dashboard and click `Manual Deploy`.
-- After deployment, verify Dashboard, Forecast, Compare, and Insights in the live app.
-
-## Notes
-
-- Market data depends on Yahoo Finance availability.
-- Forecasts are model-generated estimates and should not be treated as financial advice.
-- The UI is designed for clarity and investor friendliness, not for trading execution.
+## 📄 License
+This project is open source and available under the [MIT License](LICENSE).
