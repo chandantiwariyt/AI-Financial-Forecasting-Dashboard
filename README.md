@@ -6,9 +6,15 @@
 
 NiveshX is an AI-powered financial forecasting dashboard for Indian and global market symbols. It combines live market data, Prophet forecasting, stock comparison, simple AI-style insights, and PDF report export in a cleaner investor-facing Streamlit interface.
 
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.x-red)
+![Plotly](https://img.shields.io/badge/Plotly-5.x-purple)
+![SciPy](https://img.shields.io/badge/SciPy-Optimization-orange)
+![Yfinance](https://img.shields.io/badge/SciPy-Optimization-blue)
+![Prophet](https://img.shields.io/badge/Prophet-Forecasting-green)
 
-## 🚀 How to Run
-Live App [Click here](https://ai-financial-forecasting-dashboard.onrender.com/)
+## 🔴 Live Demo
+> Run locally using the steps below — or Live deployment on [Click here](https://ai-financial-forecasting-dashboard.onrender.com/)
 
 ## 📊 Sample Tickers
 - Indian Stocks: RELIANCE.NS, TCS.NS, HDFCBANK.NS
