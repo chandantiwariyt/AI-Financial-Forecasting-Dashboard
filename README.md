@@ -1,4 +1,4 @@
-# >![alt text](niveshx-logo-cropped) NiveshX
+# NiveshX
 
 <p align="center">
   <img src="assets/niveshx-logo-cropped.png" alt="NiveshX Logo" width="280">
