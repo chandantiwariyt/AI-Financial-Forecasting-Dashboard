@@ -18,9 +18,13 @@ def calculate_forecast_accuracy(actual, predicted) -> dict:
     }
 
 def calculate_risk_metrics(returns) -> dict:
-    sharpe  = (returns.mean() / returns.std()) * np.sqrt(252)
-    neg     = returns[returns < 0]
-    sortino = (returns.mean() / neg.std()) * np.sqrt(252)
+    # Guard against division by zero when returns have zero standard deviation
+    returns_std = returns.std()
+    sharpe = (returns.mean() / returns_std) * np.sqrt(252) if returns_std != 0 else 0.0
+
+    neg = returns[returns < 0]
+    neg_std = neg.std()
+    sortino = (returns.mean() / neg_std) * np.sqrt(252) if len(neg) > 0 and neg_std != 0 else 0.0
 
     cumulative  = (1 + returns).cumprod()
     rolling_max = cumulative.cummax()

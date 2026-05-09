@@ -1,41 +1,47 @@
 import yfinance as yf
 import pandas as pd
+import streamlit as st
 from fredapi import Fred
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# =========================
-# 📊 STOCK DATA (HISTORICAL)
-# =========================
-def get_stock_data(ticker: str, period: str = "2y") -> pd.DataFrame:
-    stock = yf.Ticker(ticker)
-    
-    df = stock.history(period=period)
+logger = logging.getLogger(__name__)
 
-    # 🔥 DEBUG PRINT
-    print(f"Ticker: {ticker}")
-    print(df.tail())
+# =========================
+# 📊 STOCK DATA (MAIN FUNCTION)
+# =========================
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_data(ticker: str, period: str = "2y") -> pd.DataFrame:
+    try:
+        stock = yf.Ticker(ticker)
+        df = stock.history(period=period)
+    except (ConnectionError, TimeoutError, ValueError) as e:
+        logger.warning(f"Failed to fetch stock data for {ticker}: {e}")
+        return pd.DataFrame()
 
     if df.empty:
-        print("⚠️ No data returned from Yahoo")
+        logger.info(f"No data returned from Yahoo for {ticker}")
+        return df
 
     df.reset_index(inplace=True)
 
+    # Ensure proper datetime
     if 'Date' in df.columns:
         df['Date'] = pd.to_datetime(df['Date'])
 
-    return df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']] if not df.empty else df
+    return df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
 
 
 # =========================
-# ⚡ LIVE PRICE (FAST)
+# ⚡ LIVE PRICE
 # =========================
+@st.cache_data(ttl=60, show_spinner=False)
 def get_live_price(ticker: str) -> float:
-    stock = yf.Ticker(ticker)
-
     try:
+        stock = yf.Ticker(ticker)
         live_price = stock.fast_info.get('lastPrice', None)
 
         if live_price is None:
@@ -43,29 +49,48 @@ def get_live_price(ticker: str) -> float:
 
         return live_price
 
-    except Exception:
+    except (ConnectionError, TimeoutError, KeyError, ValueError) as e:
+        logger.warning(f"Failed to get live price for {ticker}: {e}")
         return None
 
 
 # =========================
 # 🧾 COMPANY FINANCIALS
 # =========================
+@st.cache_data(ttl=600, show_spinner=False)
 def get_company_financials(ticker: str) -> dict:
-    stock = yf.Ticker(ticker)
+    try:
+        stock = yf.Ticker(ticker)
 
-    return {
-        'income_statement': stock.financials,
-        'balance_sheet': stock.balance_sheet,
-        'cash_flow': stock.cashflow,
-        'info': stock.info
-    }
+        return {
+            'income_statement': stock.financials,
+            'balance_sheet': stock.balance_sheet,
+            'cash_flow': stock.cashflow,
+            'info': stock.info
+        }
+
+    except (ConnectionError, TimeoutError, KeyError, ValueError) as e:
+        logger.warning(f"Failed to get financials for {ticker}: {e}")
+        return {
+            'income_statement': None,
+            'balance_sheet': None,
+            'cash_flow': None,
+            'info': {}
+        }
 
 
 # =========================
-# 🌍 MACRO DATA (FRED)
+# 🌍 MACRO DATA
 # =========================
+@st.cache_data(ttl=3600, show_spinner=False)
 def get_macro_indicators() -> pd.DataFrame:
-    fred = Fred(api_key=os.getenv("FRED_API_KEY"))
+    fred_key = os.getenv("FRED_API_KEY")
+
+    if not fred_key:
+        logger.error("FRED_API_KEY not set")
+        return pd.DataFrame()
+
+    fred = Fred(api_key=fred_key)
 
     indicators = {
         'GDP': 'GDP',
@@ -81,7 +106,8 @@ def get_macro_indicators() -> pd.DataFrame:
         try:
             series = fred.get_series(series_id, observation_start='2020-01-01')
             macro_df[name] = series
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Failed to fetch {name}: {e}")
             macro_df[name] = None
 
     macro_df.reset_index(inplace=True)
@@ -91,12 +117,12 @@ def get_macro_indicators() -> pd.DataFrame:
 
 
 # =========================
-# 🚀 SNAPSHOT (OPTIONAL PRO FEATURE)
+# 🚀 SNAPSHOT
 # =========================
+@st.cache_data(ttl=60, show_spinner=False)
 def get_company_snapshot(ticker: str) -> dict:
-    stock = yf.Ticker(ticker)
-
     try:
+        stock = yf.Ticker(ticker)
         fast = stock.fast_info
 
         return {
@@ -105,5 +131,6 @@ def get_company_snapshot(ticker: str) -> dict:
             "volume": fast.get("lastVolume")
         }
 
-    except Exception:
+    except Exception as e:
+        logger.warning(f"Failed to get snapshot for {ticker}: {e}")
         return {}
