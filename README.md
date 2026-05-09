@@ -1,5 +1,9 @@
 # >![alt text](niveshx-logo-cropped) NiveshX
 
+<p align="center">
+  <img src="assets/niveshx-logo-cropped.png" alt="NiveshX Logo" width="280">
+</p>
+
 NiveshX is an AI-powered financial forecasting dashboard for Indian and global market symbols. It combines live market data, Prophet forecasting, stock comparison, simple AI-style insights, and PDF report export in a cleaner investor-facing Streamlit interface.
 
 
