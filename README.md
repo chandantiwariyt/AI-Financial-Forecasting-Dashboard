@@ -2,9 +2,6 @@
 
 NiveshX is an AI-powered financial forecasting dashboard for Indian and global market symbols. It combines live market data, Prophet forecasting, stock comparison, simple AI-style insights, and PDF report export in a cleaner investor-facing Streamlit interface.
 
-## 🛠 Tech Stack
-- Python, Streamlit, Prophet, TensorFlow
-- yFinance, FRED API, Plotly, Pandas, Scikit-learn
 
 ## 🚀 How to Run
 pip install -r requirements.txt
