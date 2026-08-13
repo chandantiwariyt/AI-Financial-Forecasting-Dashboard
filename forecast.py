@@ -6,7 +6,13 @@ from data.preprocessor import preprocess_data
 from models.prophet_model import run_prophet_model
 
 
-def show_forecast(format_inr=None):
+def show_forecast(format_inr=None, ticker: str | None = None):
+    """Render the forecast page.
+
+    Args:
+        format_inr: optional formatting helper (app passes this)
+        ticker: optional ticker symbol to forecast. If not provided, falls back to st.session_state.ticker.
+    """
     st.markdown(
         """
         <div class="page-head">
@@ -23,7 +29,8 @@ def show_forecast(format_inr=None):
     with col1:
         with st.container(border=True):
             st.markdown("### Configuration")
-            stock = st.text_input("Stock Symbol", st.session_state.get("ticker", "RELIANCE.NS"))
+            current_ticker = ticker or st.session_state.get("ticker", "RELIANCE.NS")
+            stock = st.text_input("Stock Symbol", value=current_ticker)
             st.caption("Use .NS for Indian stocks")
 
             period_map = {"30 Days": 30, "90 Days": 90, "1 Year": 365}
