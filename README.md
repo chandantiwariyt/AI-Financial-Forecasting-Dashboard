@@ -14,7 +14,7 @@ NiveshX is an AI-powered financial forecasting dashboard for Indian and global m
 
 ## 🔴 Live Demo
 
-Run locally using the steps below, or open the deployed dashboard: [ai-financial-forecasting-dashboard.onrender.com](https://ai-financial-forecasting-dashboard.onrender.com/)
+Run locally using the steps below, or open the deployed dashboard: [Live🔴](https://ai-financial-forecasting-dashboard.onrender.com/)
 
 ## Sample Tickers
 
