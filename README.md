@@ -6,25 +6,27 @@
 
 NiveshX is an AI-powered financial forecasting dashboard for Indian and global market symbols. It combines live market data, Prophet forecasting, stock comparison, simple AI-style insights, and PDF report export in a cleaner investor-facing Streamlit interface.
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.x-red)
-![Plotly](https://img.shields.io/badge/Plotly-5.x-purple)
-![SciPy](https://img.shields.io/badge/SciPy-Optimization-orange)
-![Yfinance](https://img.shields.io/badge/SciPy-Optimization-blue)
+![Plotly](https://img.shields.io/badge/Plotly-6.x-purple)
 ![Prophet](https://img.shields.io/badge/Prophet-Forecasting-green)
+![yfinance](https://img.shields.io/badge/yfinance-Market%20Data-blue)
 
 ## 🔴 Live Demo
-> Run locally using the steps below — or Live deployment on [Click here](https://ai-financial-forecasting-dashboard.onrender.com/)
 
-## 📊 Sample Tickers
-- Indian Stocks: RELIANCE.NS, TCS.NS, HDFCBANK.NS
-- US Stocks: AAPL, MSFT, GOOGL
+Run locally using the steps below, or open the deployed dashboard: [ai-financial-forecasting-dashboard.onrender.com](https://ai-financial-forecasting-dashboard.onrender.com/)
+
+## Sample Tickers
+
+- Indian stocks: `RELIANCE.NS`, `TCS.NS`, `HDFCBANK.NS`
+- Plain Indian search fallback: `RELIANCE` resolves to `RELIANCE.NS` if the exact symbol has no Yahoo Finance data.
+- US stocks: `AAPL`, `MSFT`, `GOOGL`
 
 ## Current Version
 
-Suggested release version: `v1.1.0`
+Suggested release version: `v1.2.2`
 
-This version fixes stock pricing for Indian-listed tickers (.NS/.BO) which were incorrectly inflated by USD-INR conversion. Also introduces multi-page architecture, NiveshX branding, and a polished top-bar navigation.
+This version fixes share-price accuracy, uses live dashboard quotes when available, keeps Indian-listed prices in INR without double conversion, and documents the NiveshX UI refresh.
 
 ## What's New In This Update
 
@@ -37,12 +39,15 @@ This version fixes stock pricing for Indian-listed tickers (.NS/.BO) which were 
 - Added a Login / Feedback button with a local feedback form.
 - Improved top navigation text contrast so inactive tabs stay readable on the white header.
 - Cleaned the stock search input focus style to remove default red/black border artifacts.
+- Fixed Indian stock prices so `.NS` and `.BO` tickers are not multiplied by USD-INR.
+- Switched Yahoo Finance history calls to unadjusted `Close` prices for clearer share-price display.
+- Added live quote usage on the Dashboard, with last close as the fallback.
+- Added ticker fallback so plain Indian symbols such as `RELIANCE` can resolve to `.NS`.
+- Added a safe yfinance cache location to avoid local cache database crashes.
 - Redesigned Dashboard metric cards and charts.
 - Redesigned Compare as a single card with a central VS marker.
-- Added full-width saffron CTA buttons.
 - Updated Forecast and Compare pages to keep the same function flow with cleaner cards.
 - Improved forecast input cleanup so invalid close prices do not produce `nan%`.
-- Added safer dashboard handling for missing recent close prices.
 
 ## Features
 
@@ -85,42 +90,82 @@ This version fixes stock pricing for Indian-listed tickers (.NS/.BO) which were 
 | Forecasting | Prophet |
 | Charts | Plotly |
 | Data handling | Pandas, NumPy |
-| Reports | Local PDF utility |
+| Reports | ReportLab |
 
-## 🚀 Getting Started
+## Run Locally
 
-### Prerequisites
-- Python 3.8+
-- pip or virtual environment
+From VS Code or PowerShell:
 
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/chandantiwariyt/AI-Financial-Forecasting-Dashboard.git
-cd personal-finance-tracker
-
-# Create and activate virtual environment
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-source .venv/bin/activate     # Mac/Linux
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the app
+```powershell
+cd "C:\Users\kunal\OneDrive\Financial ProJects\AI financial Forcasting Dashboards"
+.\venv\Scripts\activate
 streamlit run app.py
 ```
 
-## 🔮 Future Improvements
-- [ ] Adding Mutual Funds
-- [ ] Nifty 50
+If `streamlit` is not recognized:
 
----
+```powershell
+.\venv\Scripts\python.exe -m streamlit run app.py
+```
 
-## 👤 Author
-Built by **Chandan Tiwari** — [LinkedIn](https://www.linkedin.com/in/chandantiwari4/) · [GitHub](https://github.com/chandantiwariyt)
----
+Then open the local URL printed by Streamlit, usually:
 
-## 📄 License
-This project is open source and available under the [MIT License](LICENSE).
+```text
+http://localhost:8501
+```
+
+## Release This As A New Version
+
+Use this checklist after testing locally:
+
+1. Review changed files:
+
+```powershell
+git status
+git diff
+```
+
+2. Stage only the files for this release:
+
+```powershell
+git add app.py dashboard.py forecast.py data/fetcher.py README.md assets/niveshx-logo.png assets/niveshx-logo-cropped.png
+```
+
+3. Commit the update:
+
+```powershell
+git commit -m "Release NiveshX price accuracy update"
+```
+
+4. Create a version tag:
+
+```powershell
+git tag v1.2.2
+```
+
+5. Push the code and tag:
+
+```powershell
+git push origin main
+git push origin v1.2.2
+```
+
+6. Redeploy:
+
+- If Render is connected to GitHub, pushing to `main` should trigger a deploy automatically.
+- If auto-deploy is disabled, open the Render dashboard and click `Manual Deploy`.
+- After deployment, verify Dashboard, Forecast, Compare, and Insights in the live app.
+
+## Future Improvements
+
+- Add mutual fund views.
+- Add Nifty 50 watchlist support.
+- Add persisted user feedback storage.
+
+## Author
+
+Built by Chandan Tiwari: [LinkedIn](https://www.linkedin.com/in/chandantiwari4/) | [GitHub](https://github.com/chandantiwariyt)
+
+## License
+
+This project is open source and available under the MIT License.

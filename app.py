@@ -1,5 +1,7 @@
 from math import isfinite
+import os
 from pathlib import Path
+import tempfile
 import time
 from typing import Optional
 
@@ -34,19 +36,42 @@ if "feedback_open" not in st.session_state:
 if "auto_refresh_last" not in st.session_state:
     st.session_state.auto_refresh_last = 0.0
 
+# yfinance keeps a small timezone cache; point it at a writable temp dir so a
+# read-only/locked default location can't crash data fetches on some hosts.
+try:
+    yf_cache_dir = Path(os.getenv("YFINANCE_CACHE_DIR", Path(tempfile.gettempdir()) / "niveshx_yfinance"))
+    yf_cache_dir.mkdir(parents=True, exist_ok=True)
+    yf.set_tz_cache_location(str(yf_cache_dir))
+except Exception:
+    pass
+
+
 # ---- Cached external fetches -----------------------------------------------
-# Streamlit's cache_data prevents re-fetching on every rerun; set TTL as appropriate.
+# @st.cache_data avoids re-hitting the network on every Streamlit rerun.
 @st.cache_data(ttl=300)
 def fetch_usd_inr_rate() -> Optional[float]:
-    """Fetch latest USD-INR rate via yfinance; return None on failure."""
+    """Return the latest USD->INR rate via yfinance, or None on failure.
+
+    Tries the cheap fast_info quote first, then a short daily-history
+    fallback. Returning None lets the caller keep the last known rate.
+    """
     try:
-        rate = yf.Ticker("USDINR=X").history(period="1d")["Close"].iloc[-1]
-        rate = float(rate)
-        if not isfinite(rate):
-            return None
-        return rate
+        ticker = yf.Ticker("USDINR=X")
+        fast_rate = ticker.fast_info.get("lastPrice")
+        if fast_rate is not None:
+            fast_rate = float(fast_rate)
+            if isfinite(fast_rate) and fast_rate > 0:
+                return fast_rate
+
+        close = ticker.history(period="5d")["Close"].dropna()
+        if not close.empty:
+            rate = float(close.iloc[-1])
+            if isfinite(rate) and rate > 0:
+                return rate
     except Exception:
         return None
+
+    return None
 
 
 def validate_ticker(candidate: str) -> bool:
@@ -75,8 +100,9 @@ def format_inr(num, ticker_override=None):
     # Indian-listed stocks (.NS / .BO) are already priced in INR by Yahoo Finance.
     ticker = ticker_override or st.session_state.get("ticker", "")
     is_indian = ticker.upper().endswith((".NS", ".BO"))
+
     if not is_indian:
-        num *= st.session_state.currency_rate
+        return f"${num:,.2f}"
 
     s = f"{num:.2f}"
     before, after = s.split(".")
@@ -91,17 +117,19 @@ def format_inr(num, ticker_override=None):
 
 # ---- Theme injection (external file preferred) -----------------------------
 def inject_theme():
-    """Load CSS from assets/theme.css if present, otherwise fall back to inline CSS."""
+    """Load the theme from assets/theme.css if present, else use an inline fallback.
+
+    SECURITY: only static, hardcoded CSS is injected here — never user input.
+    """
     if THEME_CSS_PATH.exists():
         css = THEME_CSS_PATH.read_text(encoding="utf-8")
         st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
         return
 
-    # Fallback to the original inline CSS (kept minimal here; prefer moving to theme.css)
+    # Minimal fallback so the layout stays usable if theme.css is missing.
     st.markdown(
         """
         <style>
-        /* Minimal fallback theme to ensure layout remains OK. Move full CSS to assets/theme.css */
         :root { --saffron: #FF8A00; --saffron-dark: #D86F00; --soft: #FFF9F2; --ink: #182230; }
         html, body, [class*="css"] { font-family: Inter, sans-serif; }
         .stApp { background: linear-gradient(180deg, #FFFFFF 0, var(--soft) 260px, #FFFFFF 100%); color: var(--ink); }
@@ -189,7 +217,7 @@ with st.container(border=True):
 
     # Feedback button (renamed from Login to match actual behavior)
     with feedback_col:
-        if st.button("Feedback", use_container_width=True):
+        if st.button("Feedback", width="stretch"):
             st.session_state.feedback_open = not st.session_state.feedback_open
 
         auto_refresh = st.checkbox("Auto refresh", value=False)
@@ -201,7 +229,7 @@ if auto_refresh:
     if now - last >= REFRESH_INTERVAL:
         st.session_state.auto_refresh_last = now
         # Trigger a controlled rerun only at the refresh interval boundary.
-        st.experimental_rerun()
+        st.rerun()
 
 # ---- Feedback panel -------------------------------------------------------
 if st.session_state.feedback_open:
@@ -217,27 +245,28 @@ if st.session_state.feedback_open:
         with contact_col:
             st.text_input("Email or phone", key="feedback_contact")
         st.text_area("Feedback", key="feedback_message", placeholder="Tell us what should be improved next.")
-        if st.button("Submit Feedback", use_container_width=True):
+        if st.button("Submit Feedback", width="stretch"):
             st.success("Thanks. Your feedback has been captured for this session.")
             # Keep the feedback purely session-scoped for now (no external storage).
 
-# ---- Page routing ---------------------------------------------------------
+
+# ---- Page routing ----------------------------------------------------------
+# Page modules live in the project root (single source of truth). Streamlit only
+# auto-detects a multi-page app from a `pages/` directory, so these root-level
+# modules are never treated as standalone pages.
 if page == "Dashboard":
     from dashboard import show_dashboard
-
     show_dashboard(format_inr)
-elif page == "Forecast":
-    # Prefer passing the ticker explicitly to ensure Forecast always gets the intended symbol.
-    from forecast import show_forecast
 
-    # NOTE: Update forecast.show_forecast signature to accept (format_inr, ticker: str)
-    # if you prefer explicit parameter passing. The module can still read st.session_state.ticker.
+elif page == "Forecast":
+    # Pass the ticker explicitly so Forecast always gets the intended symbol.
+    from forecast import show_forecast
     show_forecast(format_inr, ticker=st.session_state.ticker)
+
 elif page == "Insights":
     from insights import show_insights
-
     show_insights()
+
 elif page == "Compare":
     from compare import show_compare
-
     show_compare(format_inr)

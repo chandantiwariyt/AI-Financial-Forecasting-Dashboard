@@ -1,7 +1,9 @@
+from math import isfinite
+
 import plotly.express as px
 import streamlit as st
 
-from data.fetcher import fetch_data
+from data.fetcher import fetch_data, get_live_price
 
 
 def show_dashboard(format_inr):
@@ -18,23 +20,48 @@ def show_dashboard(format_inr):
         unsafe_allow_html=True,
     )
 
-    df = fetch_data(stock).dropna(subset=["Close"])
+    raw_df = fetch_data(stock)
+
+    if raw_df.empty:
+        st.error("No price data found. Try a symbol like RELIANCE.NS, TCS.NS, AAPL, or MSFT.")
+        return
+
+    resolved_stock = raw_df.attrs.get("resolved_ticker", stock)
+    df = raw_df.dropna(subset=["Close"])
 
     if len(df) < 2:
         st.error("Not enough recent price data found for this ticker.")
         return
 
-    latest = df["Close"].iloc[-1]
-    prev = df["Close"].iloc[-2]
+    latest_close = float(df["Close"].iloc[-1])
+    live_price = get_live_price(resolved_stock)
+    has_live_price = live_price is not None and isfinite(float(live_price)) and float(live_price) > 0
+
+    if has_live_price:
+        latest = float(live_price)
+        prev = latest_close
+        price_label = "Price (Live)"
+    else:
+        latest = latest_close
+        prev = float(df["Close"].iloc[-2])
+        price_label = "Price (Last Close)"
+
     volume = df["Volume"].dropna().iloc[-1] if "Volume" in df and not df["Volume"].dropna().empty else 0
 
     change = latest - prev
     pct = (change / prev) * 100 if prev else 0
-    trend_label = "Uptrend" if pct > 0 else "Downtrend"
-    trend_icon = "↗" if pct > 0 else "↘"
+    if pct > 0:
+        trend_label, trend_icon = "Uptrend", "↗"
+    elif pct < 0:
+        trend_label, trend_icon = "Downtrend", "↘"
+    else:
+        trend_label, trend_icon = "Flat", "→"
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.markdown(f"<div class='metric-card'>Price<b>{format_inr(latest)}</b></div>", unsafe_allow_html=True)
+    col1.markdown(
+        f"<div class='metric-card'>{price_label}<b>{format_inr(latest, ticker_override=resolved_stock)}</b></div>",
+        unsafe_allow_html=True,
+    )
     col2.markdown(f"<div class='metric-card'>Change<b>{pct:.2f}%</b></div>", unsafe_allow_html=True)
     col3.markdown(f"<div class='metric-card'>Volume<b>{volume:,.0f}</b></div>", unsafe_allow_html=True)
     col4.markdown(f"<div class='metric-card'>Trend<b>{trend_icon} {trend_label}</b></div>", unsafe_allow_html=True)
@@ -52,12 +79,14 @@ def show_dashboard(format_inr):
             yaxis=dict(gridcolor="#F0E5D8", title="Close"),
             hovermode="x unified",
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     st.markdown("### Market Insight")
     if pct > 1:
         st.success("Strong upward momentum detected.")
     elif pct > 0:
         st.info("Moderate growth observed.")
+    elif pct == 0:
+        st.info("Price is flat versus the last close.")
     else:
         st.warning("Downward pressure on stock.")

@@ -236,6 +236,7 @@ div[data-testid="stTextInput"] div[data-baseweb="input"],
 div[data-testid="stTextInput"] div[data-baseweb="base-input"],
 .stTextInput div[data-baseweb="input"],
 .stTextInput div[data-baseweb="base-input"],
+.stSelectbox div[data-baseweb="select"],
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
   border: 1px solid var(--line) !important;
   border-radius: 14px !important;
@@ -243,6 +244,38 @@ div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
   background-color: #FFFFFF !important;
   box-shadow: none !important;
   outline: none !important;
+}
+
+/* Selectbox dropdown: keep option text readable and the popover on white. */
+div[data-testid="stSelectbox"] *,
+.stSelectbox *,
+div[data-baseweb="popover"] *,
+ul[role="listbox"] *,
+li[role="option"] * {
+  color: var(--ink) !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  opacity: 1 !important;
+}
+
+div[data-testid="stSelectbox"] svg,
+.stSelectbox svg {
+  color: var(--muted) !important;
+  fill: var(--muted) !important;
+}
+
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div,
+ul[role="listbox"],
+li[role="option"] {
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+}
+
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+  background: var(--saffron-soft) !important;
+  color: var(--saffron-dark) !important;
+  -webkit-text-fill-color: var(--saffron-dark) !important;
 }
 
 div[data-testid="stTextInput"] div[data-baseweb="input"] *,
@@ -299,20 +332,26 @@ div[data-testid="stTextInput"] [aria-invalid="true"] {
   box-shadow: none !important;
 }
 
-.stButton > button {
+.stButton > button,
+.stDownloadButton > button,
+div[data-testid="stDownloadButton"] button {
   border-radius: 12px;
   border: 1px solid var(--saffron);
   background: var(--saffron);
   color: #FFFFFF;
+  -webkit-text-fill-color: #FFFFFF !important;
   font-weight: 750;
   min-height: 44px;
   box-shadow: 0 8px 18px rgba(255, 138, 0, 0.24);
 }
 
-.stButton > button:hover {
+.stButton > button:hover,
+.stDownloadButton > button:hover,
+div[data-testid="stDownloadButton"] button:hover {
   border-color: var(--saffron-dark);
   background: var(--saffron-dark);
   color: #FFFFFF;
+  -webkit-text-fill-color: #FFFFFF !important;
 }
 
 div[data-testid="stAlert"] {

@@ -37,7 +37,7 @@ def show_forecast(format_inr=None, ticker: str | None = None):
             period = st.selectbox("Forecast Period", list(period_map.keys()))
             forecast_days = period_map[period]
 
-            run = st.button("Run Prediction", use_container_width=True)
+            run = st.button("Run Prediction", width="stretch")
 
     with col2:
         with st.container(border=True):
@@ -52,13 +52,14 @@ def show_forecast(format_inr=None, ticker: str | None = None):
                             st.error("No data found. Check stock symbol.")
                             return
 
+                        resolved_stock = raw_df.attrs.get("resolved_ticker", stock)
                         df = preprocess_data(raw_df)
 
                         if len(df) < 2:
                             st.error("Not enough valid price data found for forecasting.")
                             return
 
-                        forecast_df = run_prophet_model(df, forecast_days=forecast_days)
+                        forecast_df = run_prophet_model(df, forecast_days=forecast_days, ticker=resolved_stock)
 
                         fig = go.Figure()
                         fig.add_trace(
@@ -107,13 +108,17 @@ def show_forecast(format_inr=None, ticker: str | None = None):
                             hovermode="x unified",
                         )
 
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width="stretch")
 
                         latest = forecast_df["yhat"].iloc[-1]
                         prev = df["y"].iloc[-1]
                         change = latest - prev
                         pct = (change / prev) * 100 if prev else 0
-                        predicted_price = format_inr(latest, ticker_override=stock) if format_inr else f"₹{latest:,.2f}"
+                        predicted_price = (
+                            format_inr(latest, ticker_override=resolved_stock)
+                            if format_inr
+                            else f"₹{latest:,.2f}"
+                        )
                         trend_label = "Up" if pct > 0 else "Down"
                         trend_icon = "↗" if pct > 0 else "↘"
                         confidence_width = forecast_df["yhat_upper"].iloc[-1] - forecast_df["yhat_lower"].iloc[-1]

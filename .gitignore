@@ -1,5 +1,29 @@
-venv/
-.env
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Secrets / environment
+.env
+.env.local
+.env.*.local
+
+# Streamlit local config
 .streamlit/
+
+# Editor / local tooling
+.vscode/
+.idea/
+.claude/launch.json
+
+# OS cruft
+.DS_Store
+Thumbs.db

@@ -28,7 +28,7 @@ def show_compare(format_inr=None):
         with col2:
             stock2 = st.text_input("Stock 2", "TCS.NS")
 
-        compare_clicked = st.button("Compare", use_container_width=True)
+        compare_clicked = st.button("Compare", width="stretch")
 
     if not compare_clicked:
         return
@@ -85,7 +85,7 @@ def show_compare(format_inr=None):
                     hovermode="x unified",
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
 
             col_a, col_b = st.columns(2)
             col_a.markdown(f"<div class='metric-card'>{stock1}<b>{perf1:.2f}%</b></div>", unsafe_allow_html=True)
